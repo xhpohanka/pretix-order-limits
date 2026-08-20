@@ -1,0 +1,30 @@
+[project]
+name = "pretix-order-limits"
+dynamic = ["version"]
+description = "Per-date and per-sales-channel order size limits for pretix"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Jan Pohanka"},
+]
+dependencies = [
+    "pretix>=2026.7.0.dev0",
+]
+
+[project.entry-points."pretix.plugin"]
+pretix_order_limits = "pretix_order_limits:PretixPluginMeta"
+
+[build-system]
+requires = ["setuptools", "pretix-plugin-build"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "pretix_order_limits.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["pretix_order_limits*"]
+

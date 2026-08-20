@@ -1,0 +1,4 @@
+recursive-include pretix_order_limits/templates *
+recursive-include pretix_order_limits/locale *
+include LICENSE
+

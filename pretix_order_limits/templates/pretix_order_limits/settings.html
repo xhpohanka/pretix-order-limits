@@ -1,0 +1,48 @@
+{% extends "pretixcontrol/event/settings_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Order limits" %}{% endblock %}
+
+{% block inside %}
+    <h1>{% trans "Order limits" %}</h1>
+    <div class="alert alert-info">
+        {% blocktrans trimmed %}
+            Set the maximum number of tickets from one event date that may be included in a single order.
+            Empty fields do not impose a limit. Add-on products are not counted.
+        {% endblocktrans %}
+    </div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-condensed table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans "Event date" %}</th>
+                        {% for channel in channels %}
+                            <th>{{ channel }}<br><small>{{ channel.identifier }}</small></th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in limit_rows %}
+                        <tr>
+                            <th>{{ row.label }}</th>
+                            {% for field in row.fields %}
+                                <td class="{% if field.errors %}has-error{% endif %}">
+                                    {{ field }}
+                                    {% for error in field.errors %}<div class="help-block">{{ error }}</div>{% endfor %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="{{ channels|length|add:1 }}">{% trans "This event has no dates." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="form-group submit-group">
+            <button type="submit" class="btn btn-primary btn-save">{% trans "Save" %}</button>
+        </div>
+    </form>
+{% endblock %}
+
