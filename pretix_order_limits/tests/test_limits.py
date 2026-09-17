@@ -15,7 +15,9 @@ from pretix.testutils.sessions import get_cart_session_key
 
 from pretix_order_limits.forms import OrderLimitsForm
 from pretix_order_limits.limits import get_order_limit, setting_key
-from pretix_order_limits.signals import validate_cart_limits, validate_order_limits
+from pretix_order_limits.signals import (
+    order_limits_settings_navigation, validate_cart_limits, validate_order_limits,
+)
 
 
 class OrderLimitTest(TestCase):
@@ -128,6 +130,15 @@ class OrderLimitTest(TestCase):
 
         with self.assertRaises(OrderError):
             validate_order_limits(self.event, positions, sales_channel=self.api)
+
+    def test_settings_are_in_event_navigation(self):
+        response = self.client.get(
+            f"/control/event/{self.organizer.slug}/{self.event.slug}/order-limits/settings"
+        )
+
+        links = order_limits_settings_navigation(self.event, response.wsgi_request)
+        self.assertEqual(links[0]["label"], "Order limits")
+        self.assertTrue(links[0]["active"])
 
     @scopes_disabled()
     def test_event_without_subevents_uses_event_scope(self):
