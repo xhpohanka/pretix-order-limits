@@ -15,6 +15,9 @@ dependencies = [
 [project.entry-points."pretix.plugin"]
 pretix_order_limits = "pretix_order_limits:PretixPluginMeta"
 
+[project.urls]
+Homepage = "https://github.com/xhpohanka/pretix-order-limits"
+
 [build-system]
 requires = ["setuptools", "pretix-plugin-build"]
 build-backend = "setuptools.build_meta"
