@@ -100,6 +100,23 @@ class OrderLimitTest(TestCase):
         return positions
 
     @scopes_disabled()
+    @scopes_disabled()
+    def test_copying_an_event_drops_per_date_limits_only(self):
+        # Event.copy_data_from() copies every setting verbatim. Dates are not copied, so
+        # a per-date limit would point at nothing; an event-wide one is keyed on a sales
+        # channel, which belongs to the organizer and survives the copy.
+        self.event.settings.set(setting_key(self.web, self.first), 3)
+        self.event.settings.set(setting_key(self.web), 9)
+
+        copy = Event.objects.create(
+            organizer=self.organizer, name="Copy", slug="copy",
+            date_from=now() + timedelta(days=60), has_subevents=True,
+        )
+        copy.copy_data_from(self.event)
+
+        self.assertIsNone(copy.settings.get(setting_key(self.web, self.first), default=None))
+        self.assertEqual(copy.settings.get(setting_key(self.web), as_type=int), 9)
+
     def test_limit_is_scoped_to_subevent_and_channel(self):
         self.event.settings.set(setting_key(self.web, self.first), 2)
         positions = self.positions(self.first, self.first, self.first)

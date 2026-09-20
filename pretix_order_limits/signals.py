@@ -7,10 +7,28 @@ from django.utils.translation import ngettext
 
 from pretix.base.services.cart import CartError
 from pretix.base.services.orders import OrderError
-from pretix.base.signals import validate_cart, validate_order
+from pretix.base.signals import event_copy_data, validate_cart, validate_order
 from pretix.control.signals import nav_event_settings
 
-from .limits import get_order_limit
+from .limits import SETTING_PREFIX, get_order_limit
+
+
+@receiver(event_copy_data, dispatch_uid="pretix_order_limits_drop_copied_pk_settings")
+def drop_copied_pk_settings(sender, other, **kwargs):
+    """
+    Event.copy_data_from() copies every setting verbatim. Our keys are
+    ``order_limits_max_<sales channel>_<scope>``, where the scope is either a subevent id
+    or the literal "event".
+
+    Dates are not copied, so per-date limits would point at nothing - drop them. The
+    event-wide ones are keyed on a sales channel, which belongs to the organizer rather
+    than the event, so they survive a copy within the same organizer and only have to go
+    when the copy crosses organizers.
+    """
+    crosses_organizers = sender.organizer_id != other.organizer_id
+    for key in [s.key for s in sender.settings._objects.all() if s.key.startswith(SETTING_PREFIX)]:
+        if crosses_organizers or key.rsplit("_", 1)[-1] != "event":
+            sender.settings.delete(key)
 
 
 @receiver(nav_event_settings, dispatch_uid="pretix_order_limits_nav_event_settings")
