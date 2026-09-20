@@ -3,7 +3,7 @@ name = "pretix-order-limits"
 dynamic = ["version"]
 description = "Per-date and per-sales-channel order size limits for pretix"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "Apache-2.0"
 requires-python = ">=3.11"
 authors = [
     {name = "Jan Pohanka"},
